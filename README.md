@@ -1,4 +1,7 @@
 # programacion-10
+
+__Propietario__: Isaac Barrantes Rojas
+
 Este repositorio corresponde al curso de programacion de 10° del Colegio Cientifico de San Vito
 # Modo de uso
 
