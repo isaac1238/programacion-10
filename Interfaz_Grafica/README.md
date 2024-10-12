@@ -30,4 +30,4 @@ py calculadora.py
 
 ## Demostracion de ejecucion
 
-![Calculadora Basica](C:\Users\Usuario\Pictures\Captura de pantalla 2024-10-11 210901)
+[Calculadora basica](calculadora.png)
