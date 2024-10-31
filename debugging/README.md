@@ -1,0 +1,2 @@
+En el codigo anterior los errores en la linea 6, 8 y 10 fueron un simple error de sintaxis ya que se esperaba un ":" al final de la linea
+Ademas se presento un error en la linea 16 ya que al no definir el valor dado como un float (podia ser int pero float es mas preciso) esto generaria un error en nuestro codigo 
