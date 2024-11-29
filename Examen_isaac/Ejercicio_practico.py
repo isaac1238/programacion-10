@@ -1,175 +1,162 @@
 import random
 import os
 
-# Determina la ubicación del script actual para guardar los archivos generados en el mismo directorio.
 RUTA_ACTUAL = os.path.dirname(os.path.abspath(__file__))
 
-class AdivinaNumero:
+class JuegoAdivinanza:
     """
     Clase que representa el juego de adivinar un número.
     """
     def __init__(self):
         """
-        Inicializa el juego generando un número aleatorio y configurando los intentos permitidos.
+        Inicializa el juego generando un número aleatorio y configurando los intentos.
         """
-        self.num_secreto = random.randint(1, 100)  # Genera un número secreto entre 1 y 100.
-        self.intentos_realizados = 0  # Cuenta los intentos realizados por el jugador.
-        self.max_intentos = 10  # Define un límite máximo de intentos.
+        self.numero_secreto = random.randint(1, 100)  # Genera un número secreto entre 1 y 100.
+        self.intentos = 0  # Lleva un conteo de los intentos realizados.
 
-    def verificarNumero(self, numero):
+    def validar_numero(self, numero: int) -> str:
         """
-        Comprueba si el número ingresado es mayor, menor o igual al número secreto.
+        Valida si el número ingresado por el jugador es mayor, menor o igual al número secreto.
 
         Args:
-            numero (int): Número proporcionado por el usuario.
+            numero (int): Número ingresado por el jugador.
 
         Returns:
-            str: Mensaje indicando el estado de la comparación.
+            str: Mensaje indicando el resultado de la validación.
         """
-        self.intentos_realizados += 1  # Incrementa el contador de intentos.
-        if numero < self.num_secreto:
+        if numero < self.numero_secreto:
             return "El número es mayor."
-        elif numero > self.num_secreto:
+        elif numero > self.numero_secreto:
             return "El número es menor."
         else:
             return "¡Correcto! Adivinaste el número."
 
-    def limiteAlcanzado(self):
+    def registrar_intento(self):
         """
-        Comprueba si se han agotado los intentos permitidos.
+        Incrementa el contador de intentos realizados.
+        """
+        self.intentos += 1
 
-        Returns:
-            bool: True si no quedan más intentos, de lo contrario False.
+    def reiniciar(self):
         """
-        return self.intentos_realizados >= self.max_intentos
-
-    def reiniciarJuego(self):
+        Reinicia el juego generando un nuevo número secreto y reseteando los intentos.
         """
-        Reinicia el juego generando un nuevo número y reseteando el contador de intentos.
-        """
-        self.num_secreto = random.randint(1, 100)
-        self.intentos_realizados = 0
+        self.numero_secreto = random.randint(1, 100)
+        self.intentos = 0
 
 
-class Usuario:
+class Jugador:
     """
-    Clase que gestiona al usuario y su historial de partidas.
+    Clase que representa a un jugador y su historial de partidas.
     """
-    def __init__(self, nombre):
+    def __init__(self, nombre: str):
         """
-        Constructor para inicializar el jugador y su registro de partidas.
+        Inicializa al jugador con su nombre y un historial vacío.
 
         Args:
             nombre (str): Nombre del jugador.
         """
         self.nombre = nombre
-        self.historial = []  # Lista que almacena los intentos y resultados de cada partida.
+        self.historial = []  # Lista para registrar el número de intentos y si ganó o no.
 
-    def guardarPartida(self, intentos, exito):
+    def registrar_partida(self, intentos: int, gano: bool):
         """
-        Registra una partida en el historial del usuario.
+        Registra los datos de una partida en el historial.
 
         Args:
-            intentos (int): Cantidad de intentos realizados.
-            exito (bool): Indica si la partida fue ganada.
+            intentos (int): Número de intentos realizados en la partida.
+            gano (bool): Indicador de si el jugador ganó o no.
         """
-        self.historial.append((intentos, exito))
+        self.historial.append((intentos, gano))
 
-    def verEstadisticas(self):
+    def mostrar_estadisticas(self):
         """
-        Muestra las estadísticas generales del usuario.
+        Muestra las estadísticas del jugador: porcentaje de aciertos y partidas jugadas.
         """
-        total_partidas = len(self.historial)
+        partidas_jugadas = len(self.historial)
         partidas_ganadas = sum(1 for _, gano in self.historial if gano)
-        porcentaje_ganadas = (partidas_ganadas / total_partidas) * 100 if total_partidas > 0 else 0
+        porcentaje_ganadas = (partidas_ganadas / partidas_jugadas) * 100 if partidas_jugadas > 0 else 0
 
         print(f"\nEstadísticas de {self.nombre}:")
-        print(f"- Total de partidas: {total_partidas}")
+        print(f"- Partidas jugadas: {partidas_jugadas}")
         print(f"- Partidas ganadas: {partidas_ganadas}")
         print(f"- Porcentaje de victorias: {porcentaje_ganadas:.2f}%\n")
 
 
-def cargarDatos():
+def cargar_datos() -> Jugador:
     """
-    Carga los datos del jugador desde el archivo 'datos.txt'.
+    Carga los datos del jugador desde el archivo 'estadisticas.txt'.
 
     Returns:
-        Usuario: Objeto con los datos cargados o None si no hay datos disponibles.
+        Jugador: Objeto con los datos cargados o un nuevo jugador si no hay datos disponibles.
     """
-    archivo_datos = os.path.join(RUTA_ACTUAL, "datos.txt")
+    archivo_datos = os.path.join(RUTA_ACTUAL, "estadisticas.txt")
     if os.path.exists(archivo_datos):
         with open(archivo_datos, "r") as archivo:
             nombre = archivo.readline().strip()
-            partidas = [tuple(map(int, linea.split(','))) for linea in archivo]
-            jugador = Usuario(nombre)
-            jugador.historial = partidas
+            historial = [tuple(map(int, linea.split(','))) for linea in archivo]
+            jugador = Jugador(nombre)
+            jugador.historial = historial
             return jugador
     return None
 
 
-def guardarDatos(usuario):
+def guardar_datos(jugador: Jugador):
     """
-    Guarda los datos del jugador en el archivo 'datos.txt'.
+    Guarda las estadísticas del jugador en el archivo 'estadisticas.txt'.
 
     Args:
-        usuario (Usuario): Objeto con los datos del jugador.
+        jugador (Jugador): Objeto con las estadísticas del jugador.
     """
-    try:
-        archivo_datos = os.path.join(RUTA_ACTUAL, "datos.txt")
-        with open(archivo_datos, "w") as archivo:
-            archivo.write(f"{usuario.nombre}\n")
-            for intentos, exito in usuario.historial:
-                archivo.write(f"{intentos},{int(exito)}\n")
-        print("\nDatos guardados correctamente.")
-    except Exception as error:
-        print(f"\nError al guardar los datos: {error}")
+    archivo_datos = os.path.join(RUTA_ACTUAL, "estadisticas.txt")
+    with open(archivo_datos, "w") as archivo:
+        archivo.write(f"{jugador.nombre}\n")
+        for intentos, gano in jugador.historial:
+            archivo.write(f"{intentos},{int(gano)}\n")
+    print("\nDatos guardados correctamente.")
 
 
 def interfaz():
     """
-    Proporciona el menú interactivo para jugar, ver estadísticas o salir.
+    Menú interactivo para jugar, ver estadísticas o salir.
     """
-    jugador = cargarDatos()
+    jugador = cargar_datos()
 
     if not jugador:
         nombre = input("Ingresa tu nombre: ").strip()
-        jugador = Usuario(nombre)
+        jugador = Jugador(nombre)
 
     while True:
         print("\nMenú:")
-        print("1. Jugar una partida")
+        print("1. Comenzar una nueva partida")
         print("2. Ver estadísticas")
         print("3. Salir")
 
         opcion = input("Elige una opción: ").strip()
 
         if opcion == "1":
-            juego = AdivinaNumero()
-            print("\n¡Adivina el número entre 1 y 100! Tienes 10 intentos.")
+            juego = JuegoAdivinanza()
+            print("\n¡Adivina el número entre 1 y 100!")
 
             while True:
                 try:
-                    numero = int(input(f"Intento {juego.intentos_realizados + 1}/10: "))
-                    mensaje = juego.verificarNumero(numero)
+                    numero = int(input(f"Intento {juego.intentos + 1}: "))
+                    juego.registrar_intento()
+                    mensaje = juego.validar_numero(numero)
                     print(mensaje)
 
                     if mensaje == "¡Correcto! Adivinaste el número.":
-                        jugador.guardarPartida(juego.intentos_realizados, True)
-                        break
-
-                    if juego.limiteAlcanzado():
-                        print(f"¡Intentos agotados! El número era {juego.num_secreto}.")
-                        jugador.guardarPartida(juego.intentos_realizados, False)
+                        jugador.registrar_partida(juego.intentos, True)
                         break
 
                 except ValueError:
                     print("Por favor, ingresa un número válido.")
 
         elif opcion == "2":
-            jugador.verEstadisticas()
+            jugador.mostrar_estadisticas()
 
         elif opcion == "3":
-            guardarDatos(jugador)
+            guardar_datos(jugador)
             print("Gracias por jugar. ¡Hasta pronto!")
             break
 
